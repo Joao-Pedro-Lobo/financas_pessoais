@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Controle Financeiro</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f7fa;
+            padding: 20px;
+            color: #333;
+        }
+        .main-container {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1400px;
+            margin: 0 auto;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        .container {
+            flex: 1;
+            min-width: 400px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+            color: #2c3e50;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            box-sizing: border-box;
+            height: 40px;
+            font-size: 16px;
+        }
+        textarea {
+            height: 120px;
+            resize: none;
+        }
+        input[type="submit"] {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            margin-top: 15px;
+            cursor: pointer;
+            height: auto;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        input[type="submit"]:hover {
+            background-color: #219653;
+        }
+        .meu-botao {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .meu-botao:hover {
+            background-color: #2980b9;
+        }
+        .grafico-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .grafico-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .tabela-container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .legenda {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #7f8c8d;
+            text-align: center;
+        }
+        .valor-total {
+            font-size: 18px;
+            font-weight: bold;
+            color: #27ae60;
+            margin-top: 20px;
+            text-align: center;
+        }
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            .container {
+                min-width: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- FORMULÁRIO -->
+        <div class="container">
+            <h1>Controle Financeiro</h1>
+            <a href="{% url 'home' %}" class="meu-botao">Voltar para Home</a>
+
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <input type="submit" value="Salvar Registro">
+            </form>
+        </div>
+
+        <!-- ANÁLISE DE DADOS -->
+        <div class="container">
+            <!-- Gráfico de pizza -->
+            {% if grafico_base64 %}
+            <div class="grafico-container">
+                <h2>Distribuição de Gastos por Categoria</h2>
+                <img src="data:image/png;base64,{{ grafico_base64 }}" alt="Gráfico de Pizza de Gastos por Categoria">
+                <div class="legenda">Gráfico mostra a porcentagem de gastos em cada categoria</div>
+            </div>
+            {% endif %}
+
+            <!-- Tabela de gastos -->
+            {% if tabela %}
+            <div class="tabela-container">
+                <h2>Resumo Financeiro</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Categoria</th>
+                            <th>Total (R$)</th>
+                            <th>Porcentagem (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in tabela %}
+                        <tr>
+                            <td>{{ item.Categoria }}</td>
+                            <td>{{ item.Total|floatformat:2 }}</td>
+                            <td>{{ item.Porcentagem|floatformat:2 }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <!-- Valor total -->
+                <div class="valor-total">
+                    Total Geral: R$ {{ total_geral|floatformat:2 }}
+                </div>
+            </div>
+            {% else %}
+            <div class="tabela-container">
+                <p>Nenhum dado financeiro disponível para exibição.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
